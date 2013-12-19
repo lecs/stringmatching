@@ -26,6 +26,10 @@
   ;;
   ;;
   ;;
-  (expect ["live" {27 ["something_completely_different" {}], 4 ["thief" {}], 3 ["leaf" {}], 1 ["life" {2 ["love" {}]}]}] (bk-tree input-sek ld)))
+  (expect ["live" {27 ["something_completely_different" {}], 4 ["thief" {}], 3 ["leaf" {}], 1 ["life" {2 ["love" {}]}]}] (bk-tree input-sek ld))
+  (expect #{[0 "live"]} (set (query-tree "live" 0 (bk-tree input-sek ld) ld)))
+  (expect #{[0 "live"] [1 "love"] [1 "life"]} (set (query-tree "live" 1 (bk-tree input-sek ld) ld)))
+  (expect #{[0 "live"] [1 "love"] [1 "life"] [3 "leaf"]} (set (query-tree "live" 3 (bk-tree input-sek ld) ld)))
+  (take 2 (query-tree "live" 3 (bk-tree input-sek ld) ld)))
 
 ;; case (b): a sequence of 2-tuples (`id-of-string-in-the-original-dataset` `string`)

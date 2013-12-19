@@ -21,9 +21,23 @@
   """
   (reduce
     (fn add [node word]
-      (let [[ref-word related] node]
-          (let [d (distfn word ref-word)]
-            (if (contains? related d)
-              [ref-word (assoc related d (add (related d) word))]
-              [ref-word (assoc related d (vector word {}))]))))
+      (let [[ref-word related] node, d (distfn word ref-word)]
+        (if (contains? related d)
+          [ref-word (assoc related d (add (related d) word))]
+          [ref-word (assoc related d (vector word {}))])))
     [(first coll) {}] (rest coll)))
+
+(defn query-tree [word n tree distfn]
+  """
+  Queries a BK-tree.
+  Returns a lazy, un-ordered sequence of matches of a string `word` against an
+  index `tree` that fall in a range of max-distance `n`, using the distance
+  function `distfn` (ideally `distfn` is the same function as used in building
+  the index).
+  """
+  ((fn collect [node]
+   (let [[ref-word related] node, d (distfn word ref-word)]
+     (let [match (if (<= d n) [d ref-word] []),
+           relevant-dists(filter #(contains? related %) (range (- d n) (+ d n 1)))]
+       (lazy-seq (cons match (mapcat collect (map #(related %) relevant-dists)))))))
+   tree))
